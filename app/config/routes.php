@@ -60,6 +60,9 @@ $route['contact'] = "Contact/index";
 
 // Internal Routes
 $route['page/(:any)'] = "Internal/getInternal/$1";
+$route['login'] = "User/login";
+$route['logout'] = "User/logUserOut";
+$route['register'] = "User/register";
 // Internal Routes End
 
 // Commercial Routes

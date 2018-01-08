@@ -17,6 +17,7 @@ class Home extends CI_Controller {
 			// Navbar Configuration
 			$data['navbarConf'] = 'main';
 			// Navbar Configuration End
+			//
 			// Load Renders for Navbar
 			$data['menuCat'] = $this->Commercial_model->getCategoryALL();
 			$data['menuBrands'] = $this->Commercial_model->getBrandsALL();
@@ -40,7 +41,8 @@ class Home extends CI_Controller {
 			// Get Combos End
 
 			// Render Title and Tags
-			$data['title'] = getSiteConfiguration()['site_name'];
+			$data['page'] = 'by FrikiCode';
+			$data['title'] = getSiteConfiguration()['site_name'] . ' ' . $data['page'];
 			$data['charset'] = getSiteConfiguration()['site_charset'];
 			$data['description'] = getSiteConfiguration()['site_desc'];
 			$data['keywords'] = getSiteConfiguration()['site_keywords'];
@@ -48,13 +50,25 @@ class Home extends CI_Controller {
 			$data['appleicon'] = getSiteConfiguration()['site_appleicon'];
 			$data['favicon'] = getSiteConfiguration()['site_favicon'];
 			$data['author'] = getSiteConfiguration()['site_author'];
+
+			// Contact Information
+			$data['phoneContact'] = getContactNfo()['phone'];
+			$data['emailContact'] = getContactNfo()['email'];
+			$data['fullAdress'] = getContactNfo()['adress'] . ' ' . getContactNfo()['city'];
+			$data['openTime'] = getContactNfo()['time'];
+			// Contact Information End
+
 			// Render Title and Tags End
 
 			// Location Script
 			$data['pais'] = $this->Location_Model->getPais();
 			// Location Script End
 
-			$this->load->view('newdesign/home', $data);
+			// Module Load
+			$data['module'] = 'home/index';
+			// Module Load End
+
+			$this->load->view('base/theme', $data);
 		}else{
 			redirect('Under', 'refresh');
 		}

@@ -2,9 +2,9 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class User extends CI_Controller {
-	
+
 	public function __construct(){
-		parent::__construct();	
+		parent::__construct();
 		$this->load->model('Commercial_model');
 		$this->load->model('Internal_model');
 		$this->load->model('User_model');
@@ -14,61 +14,23 @@ class User extends CI_Controller {
 	public function regUser() {
 		$regname = $_POST['name'];
 		$reglastname = $_POST['lastname'];
-		$regphone = $_POST['phone'];
 		$regmail = $_POST['mail'];
 		$regpass = $_POST['pass'];
-		$paisID = $_POST['paisID'];
-		$provinciaID = $_POST['provinciaID'];
-		$partidoID = $_POST['partidoID'];
-		$localidadID = $_POST['localidadID'];
-		$barrioID = $_POST['barrioID'];
-		$subbarrioID = $_POST['subbarrioID'];
 
 		$additional_data = array(
 			'first_name' => $regname,
 			'last_name' => $reglastname,
 			'username' => $regmail,
-			'pais' => $paisID,
-			'provincia' => $provinciaID,
-			'partido' => $partidoID,
-			'localidad' => $localidadID,
-			'barrio' => $barrioID,
-			'subbarrio' => $subbarrioID
+			'active' => 1
 		);
 
 		$group = array('2');
-		
-		// Load Renders for Navbar
-		$data['menuCat'] = $this->Commercial_model->getCategoryALL();
-		$data['menuBrands'] = $this->Commercial_model->getBrandsALL();
-		$data['menuInt'] = $this->Internal_model->getInternalALL();
-		// Load Renders for Navbar End
-
-		// Get Basic Info For Page Meta
-		$data['title'] = getSiteConfiguration()['site_name'] . ' | ' . 'Bienvenido';
-		$data['charset'] = getSiteConfiguration()['site_charset'];
-		$data['description'] = getSiteConfiguration()['site_desc'];
-		$data['keywords'] = getSiteConfiguration()['site_keywords'];
-		$data['language'] = getSiteConfiguration()['site_lang'];
-		$data['appleicon'] = getSiteConfiguration()['site_appleicon'];
-		$data['favicon'] = getSiteConfiguration()['site_favicon'];
-		$data['author'] = getSiteConfiguration()['site_author'];
-
-		// Location Script
-		$data['pais'] = $this->Location_Model->getPais();
-		// Location Script End
-
-		// Render Visualizations
-		$data['titleSpot'] = 'Bienvenido';
-		// Render Visualizations End
 
 		$this->ion_auth->register($regmail, $regpass, $regmail, $additional_data, $group);
 
 		$userID = getLastUserRegister();
 
-		createIndCompany($userID);
-
-		$this->load->view('auth/welcome', $data);
+		redirect('User/welcome','refresh');
 	}
 
 	public function logUser() {
@@ -84,41 +46,15 @@ class User extends CI_Controller {
 
 		$this->ion_auth->login($identity, $password, $remember);
 		//echo $identity . ' ' . $password . ' ' . $remember;
-		
+
 		if ($this->ion_auth->login($identity, $password, $remember))
-		{	
+		{
 			redirect('Home','refresh');
 		}
 		else
 		{
-			// Load Renders for Navbar
-			$data['menuCat'] = $this->Commercial_model->getCategoryALL();
-			$data['menuBrands'] = $this->Commercial_model->getBrandsALL();
-			$data['menuInt'] = $this->Internal_model->getInternalALL();
-			// Load Renders for Navbar End
+			redirect('User/login','refresh');
 
-			// Get Basic Info For Page Meta
-			$data['title'] = getSiteConfiguration()['site_name'] . ' | ' . 'Bienvenido';
-			$data['charset'] = getSiteConfiguration()['site_charset'];
-			$data['description'] = getSiteConfiguration()['site_desc'];
-			$data['keywords'] = getSiteConfiguration()['site_keywords'];
-			$data['language'] = getSiteConfiguration()['site_lang'];
-			$data['appleicon'] = getSiteConfiguration()['site_appleicon'];
-			$data['favicon'] = getSiteConfiguration()['site_favicon'];
-			$data['author'] = getSiteConfiguration()['site_author'];
-
-			// Location Script
-			$data['pais'] = $this->Location_Model->getPais();
-			// Location Script End
-
-			// Render Visualizations
-			$data['titleSpot'] = 'Iniciar Sesion';
-			// Render Visualizations End
-
-			$data['loginFail'] = TRUE;
-
-			// Load View
-			$this->load->view('user/login', $data);
 		}
 
 	}
@@ -141,7 +77,7 @@ class User extends CI_Controller {
 
 		// Render Title and Tags
 		if ($this->ion_auth->logged_in()) {
-			
+
 			redirect('Home','refresh');
 
 		}else{
@@ -166,23 +102,33 @@ class User extends CI_Controller {
 
 	public function login()
 	{
-		// Navbar Configuration
-		$data['navbarConf'] = 'commercial';
-		// Navbar Configuration End
-		// Load Renders for Navbar
-		$data['menuCat'] = $this->Commercial_model->getCategoryALL();
-		$data['menuBrands'] = $this->Commercial_model->getBrandsALL();
-		$data['menuInt'] = $this->Internal_model->getInternalALL();
-		// Load Renders for Navbar End
 
-		// Render Title and Tags
-		if ($this->ion_auth->logged_in()) {
-			
-			redirect('Home','refresh');
+		if (getSiteConfiguration()['cooming_soon'] == false) {
+			// Navbar Configuration
+			$data['navbarConf'] = 'main';
+			// Navbar Configuration End
+			//
+			// Load Renders for Navbar
+			$data['menuCat'] = $this->Commercial_model->getCategoryALL();
+			$data['menuBrands'] = $this->Commercial_model->getBrandsALL();
+			$data['menuInt'] = $this->Internal_model->getInternalALL();
+			// Load Renders for Navbar End
 
-		}else{
-			// Get Basic Info For Page Meta
-			$data['title'] = getSiteConfiguration()['site_name'] . ' | ' . 'Iniciar Sesion';
+			// Get Products Dest
+			$data['productDest'] = $this->Commercial_model->getProdDest();
+			// Get Products Dest End
+
+			// Get Testimonials
+			$data['abouts'] = $this->Internal_model->getAllAbouts();
+			// Get Testimonials End
+
+			// Get Combos
+			$data['combos'] = $this->Commercial_model->getCombosALL();
+			// Get Combos End
+
+			// Render Title and Tags
+			$data['page'] = '| Iniciar Sesion';
+			$data['title'] = getSiteConfiguration()['site_name'] . ' ' . $data['page'];
 			$data['charset'] = getSiteConfiguration()['site_charset'];
 			$data['description'] = getSiteConfiguration()['site_desc'];
 			$data['keywords'] = getSiteConfiguration()['site_keywords'];
@@ -191,36 +137,58 @@ class User extends CI_Controller {
 			$data['favicon'] = getSiteConfiguration()['site_favicon'];
 			$data['author'] = getSiteConfiguration()['site_author'];
 
+			// Contact Information
+			$data['phoneContact'] = getContactNfo()['phone'];
+			$data['emailContact'] = getContactNfo()['email'];
+			$data['fullAdress'] = getContactNfo()['adress'] . ' ' . getContactNfo()['city'];
+			$data['openTime'] = getContactNfo()['time'];
+			// Contact Information End
+
+			// Render Title and Tags End
+
 			// Location Script
 			$data['pais'] = $this->Location_Model->getPais();
 			// Location Script End
 
-			$data['loginFail'] = FALSE;
+			// Module Load
+			$data['module'] = 'user/login';
+			// Module Load End
 
-			// Load View
-			$this->load->view('user/login', $data);
+			$this->load->view('base/theme', $data);
+		}else{
+			redirect('Under', 'refresh');
 		}
 	}
 
 	public function register()
 	{
-		// Navbar Configuration
-		$data['navbarConf'] = 'commercial';
-		// Navbar Configuration End
-		// Load Renders for Navbar
-		$data['menuCat'] = $this->Commercial_model->getCategoryALL();
-		$data['menuBrands'] = $this->Commercial_model->getBrandsALL();
-		$data['menuInt'] = $this->Internal_model->getInternalALL();
-		// Load Renders for Navbar End
 
-		// Render Title and Tags
-		if ($this->ion_auth->logged_in()) {
-			
-			redirect('Home','refresh');
+		if (getSiteConfiguration()['cooming_soon'] == false) {
+			// Navbar Configuration
+			$data['navbarConf'] = 'main';
+			// Navbar Configuration End
+			//
+			// Load Renders for Navbar
+			$data['menuCat'] = $this->Commercial_model->getCategoryALL();
+			$data['menuBrands'] = $this->Commercial_model->getBrandsALL();
+			$data['menuInt'] = $this->Internal_model->getInternalALL();
+			// Load Renders for Navbar End
 
-		}else{
-			// Get Basic Info For Page Meta
-			$data['title'] = getSiteConfiguration()['site_name'] . ' | ' . 'Registrarse';
+			// Get Products Dest
+			$data['productDest'] = $this->Commercial_model->getProdDest();
+			// Get Products Dest End
+
+			// Get Testimonials
+			$data['abouts'] = $this->Internal_model->getAllAbouts();
+			// Get Testimonials End
+
+			// Get Combos
+			$data['combos'] = $this->Commercial_model->getCombosALL();
+			// Get Combos End
+
+			// Render Title and Tags
+			$data['page'] = '| Registro';
+			$data['title'] = getSiteConfiguration()['site_name'] . ' ' . $data['page'];
 			$data['charset'] = getSiteConfiguration()['site_charset'];
 			$data['description'] = getSiteConfiguration()['site_desc'];
 			$data['keywords'] = getSiteConfiguration()['site_keywords'];
@@ -229,12 +197,86 @@ class User extends CI_Controller {
 			$data['favicon'] = getSiteConfiguration()['site_favicon'];
 			$data['author'] = getSiteConfiguration()['site_author'];
 
+			// Contact Information
+			$data['phoneContact'] = getContactNfo()['phone'];
+			$data['emailContact'] = getContactNfo()['email'];
+			$data['fullAdress'] = getContactNfo()['adress'] . ' ' . getContactNfo()['city'];
+			$data['openTime'] = getContactNfo()['time'];
+			// Contact Information End
+
+			// Render Title and Tags End
+
 			// Location Script
 			$data['pais'] = $this->Location_Model->getPais();
 			// Location Script End
 
-			// Load View
-			$this->load->view('user/register', $data);
+			// Module Load
+			$data['module'] = 'user/register';
+			// Module Load End
+
+			$this->load->view('base/theme', $data);
+		}else{
+			redirect('Under', 'refresh');
+		}
+	}
+
+	public function welcome()
+	{
+
+		if (getSiteConfiguration()['cooming_soon'] == false) {
+			// Navbar Configuration
+			$data['navbarConf'] = 'main';
+			// Navbar Configuration End
+			//
+			// Load Renders for Navbar
+			$data['menuCat'] = $this->Commercial_model->getCategoryALL();
+			$data['menuBrands'] = $this->Commercial_model->getBrandsALL();
+			$data['menuInt'] = $this->Internal_model->getInternalALL();
+			// Load Renders for Navbar End
+
+			// Get Products Dest
+			$data['productDest'] = $this->Commercial_model->getProdDest();
+			// Get Products Dest End
+
+			// Get Testimonials
+			$data['abouts'] = $this->Internal_model->getAllAbouts();
+			// Get Testimonials End
+
+			// Get Combos
+			$data['combos'] = $this->Commercial_model->getCombosALL();
+			// Get Combos End
+
+			// Render Title and Tags
+			$data['page'] = '| Bienvenido';
+			$data['title'] = getSiteConfiguration()['site_name'] . ' ' . $data['page'];
+			$data['charset'] = getSiteConfiguration()['site_charset'];
+			$data['description'] = getSiteConfiguration()['site_desc'];
+			$data['keywords'] = getSiteConfiguration()['site_keywords'];
+			$data['language'] = getSiteConfiguration()['site_lang'];
+			$data['appleicon'] = getSiteConfiguration()['site_appleicon'];
+			$data['favicon'] = getSiteConfiguration()['site_favicon'];
+			$data['author'] = getSiteConfiguration()['site_author'];
+
+			// Contact Information
+			$data['phoneContact'] = getContactNfo()['phone'];
+			$data['emailContact'] = getContactNfo()['email'];
+			$data['fullAdress'] = getContactNfo()['adress'] . ' ' . getContactNfo()['city'];
+			$data['openTime'] = getContactNfo()['time'];
+			// Contact Information End
+
+			// Render Title and Tags End
+
+			// Location Script
+			$data['pais'] = $this->Location_Model->getPais();
+			// Location Script End
+
+			// Module Load
+			$data['module'] = 'user/welcome';
+			// Module Load End
+
+			$this->load->view('base/theme', $data);
+		}else{
+			redirect('Under', 'refresh');
 		}
 	}
 
@@ -254,7 +296,7 @@ class User extends CI_Controller {
 			// Handle User Info
 			$userID = $this->ion_auth->get_user_id();
 			$data['userNfo'] = $this->User_model->getByID($userID);
-			
+
 			// Get Basic Info For Page Meta
 			$data['title'] = getSiteConfiguration()['site_name'] . ' | ' . 'Informacion Personal';
 			$data['charset'] = getSiteConfiguration()['site_charset'];
@@ -324,7 +366,7 @@ class User extends CI_Controller {
         );
 
 		$this->db->where('id', $userID);
-		$this->db->update('users', $data); 
+		$this->db->update('users', $data);
 		redirect('User/personalInfo','refresh');
 
 		}else{
@@ -350,7 +392,7 @@ class User extends CI_Controller {
 			// Handle User Info
 			$userID = $this->ion_auth->get_user_id();
 			$data['userNfo'] = $this->User_model->getByID($userID);
-			
+
 			$data['userID'] = $userID;
 			// Get Basic Info For Page Meta
 			$data['title'] = getSiteConfiguration()['site_name'] . ' | ' . 'Informacion de Seguridad';
@@ -394,7 +436,7 @@ class User extends CI_Controller {
 			// Handle User Info
 			$userID = $this->ion_auth->get_user_id();
 			$data['userNfo'] = $this->User_model->getByID($userID);
-			
+
 			$data['userID'] = $userID;
 			// Get Basic Info For Page Meta
 			$data['title'] = getSiteConfiguration()['site_name'] . ' | ' . 'Informacion de Seguridad';
@@ -488,9 +530,9 @@ class User extends CI_Controller {
 		$config['newline']    = getMailConfiguration()['smtp_newline'];
 		$config['mailtype'] = getMailConfiguration()['smtp_mailtype'];
 		$config['validation'] = getMailConfiguration()['smtp_validation'];
-		
+
 	    for ($i = 0; $i < 1; $i++) {
-	        $subject = $MailNfo['title'];	      
+	        $subject = $MailNfo['title'];
 	        $sendto = $MailNfo['sendto'];
 	        $this->email->initialize($config);
 	        $this->email->from($from, getSiteConfiguration()['site_name']);
@@ -502,6 +544,6 @@ class User extends CI_Controller {
 	        echo $this->email->print_debugger();
 	        $i + 1;
 	    }
-	    
+
 	}
 }
